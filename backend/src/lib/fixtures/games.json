@@ -1,0 +1,110 @@
+[
+  {
+    "fixture": { "id": 1001, "date": "2026-06-11T15:00:00Z", "status": { "short": "FT" } },
+    "league": { "round": "Group Stage - 1", "season": 2026 },
+    "teams": {
+      "home": { "name": "Brasil", "logo": "https://media.api-sports.io/football/teams/6.png" },
+      "away": { "name": "México", "logo": "https://media.api-sports.io/football/teams/16.png" }
+    },
+    "goals": { "home": 2, "away": 0 }
+  },
+  {
+    "fixture": { "id": 1002, "date": "2026-06-11T18:00:00Z", "status": { "short": "FT" } },
+    "league": { "round": "Group Stage - 1", "season": 2026 },
+    "teams": {
+      "home": { "name": "Argentina", "logo": "https://media.api-sports.io/football/teams/26.png" },
+      "away": { "name": "Canadá", "logo": "https://media.api-sports.io/football/teams/101.png" }
+    },
+    "goals": { "home": 3, "away": 1 }
+  },
+  {
+    "fixture": { "id": 1003, "date": "2026-06-14T21:00:00Z", "status": { "short": "FT" } },
+    "league": { "round": "Group Stage - 1", "season": 2026 },
+    "teams": {
+      "home": { "name": "Espanha", "logo": "https://media.api-sports.io/football/teams/9.png" },
+      "away": { "name": "Portugal", "logo": "https://media.api-sports.io/football/teams/27.png" }
+    },
+    "goals": { "home": 1, "away": 1 }
+  },
+  {
+    "fixture": { "id": 1004, "date": "2026-06-15T15:00:00Z", "status": { "short": "FT" } },
+    "league": { "round": "Group Stage - 1", "season": 2026 },
+    "teams": {
+      "home": { "name": "França", "logo": "https://media.api-sports.io/football/teams/2.png" },
+      "away": { "name": "Alemanha", "logo": "https://media.api-sports.io/football/teams/25.png" }
+    },
+    "goals": { "home": 2, "away": 2 }
+  },
+  {
+    "fixture": { "id": 1005, "date": "2026-06-16T18:00:00Z", "status": { "short": "FT" } },
+    "league": { "round": "Group Stage - 1", "season": 2026 },
+    "teams": {
+      "home": { "name": "Inglaterra", "logo": "https://media.api-sports.io/football/teams/10.png" },
+      "away": { "name": "Japão", "logo": "https://media.api-sports.io/football/teams/29.png" }
+    },
+    "goals": { "home": 0, "away": 1 }
+  },
+  {
+    "fixture": { "id": 1006, "date": "2026-06-17T21:00:00Z", "status": { "short": "FT" } },
+    "league": { "round": "Group Stage - 2", "season": 2026 },
+    "teams": {
+      "home": { "name": "Holanda", "logo": "https://media.api-sports.io/football/teams/1118.png" },
+      "away": { "name": "Itália", "logo": "https://media.api-sports.io/football/teams/768.png" }
+    },
+    "goals": { "home": 1, "away": 0 }
+  },
+  {
+    "fixture": { "id": 1007, "date": "2026-06-20T15:00:00Z", "status": { "short": "NS" } },
+    "league": { "round": "Group Stage - 2", "season": 2026 },
+    "teams": {
+      "home": { "name": "Brasil", "logo": "https://media.api-sports.io/football/teams/6.png" },
+      "away": { "name": "Canadá", "logo": "https://media.api-sports.io/football/teams/101.png" }
+    },
+    "goals": { "home": null, "away": null }
+  },
+  {
+    "fixture": { "id": 1008, "date": "2026-06-20T18:00:00Z", "status": { "short": "NS" } },
+    "league": { "round": "Group Stage - 2", "season": 2026 },
+    "teams": {
+      "home": { "name": "Argentina", "logo": "https://media.api-sports.io/football/teams/26.png" },
+      "away": { "name": "México", "logo": "https://media.api-sports.io/football/teams/16.png" }
+    },
+    "goals": { "home": null, "away": null }
+  },
+  {
+    "fixture": { "id": 1009, "date": "2026-06-22T21:00:00Z", "status": { "short": "NS" } },
+    "league": { "round": "Group Stage - 3", "season": 2026 },
+    "teams": {
+      "home": { "name": "Espanha", "logo": "https://media.api-sports.io/football/teams/9.png" },
+      "away": { "name": "Marrocos", "logo": "https://media.api-sports.io/football/teams/32.png" }
+    },
+    "goals": { "home": null, "away": null }
+  },
+  {
+    "fixture": { "id": 1010, "date": "2026-06-23T15:00:00Z", "status": { "short": "NS" } },
+    "league": { "round": "Group Stage - 3", "season": 2026 },
+    "teams": {
+      "home": { "name": "Estados Unidos", "logo": "https://media.api-sports.io/football/teams/1.png" },
+      "away": { "name": "França", "logo": "https://media.api-sports.io/football/teams/2.png" }
+    },
+    "goals": { "home": null, "away": null }
+  },
+  {
+    "fixture": { "id": 2001, "date": "2026-07-01T18:00:00Z", "status": { "short": "NS" } },
+    "league": { "round": "Round of 16", "season": 2026 },
+    "teams": {
+      "home": { "name": "Brasil", "logo": "https://media.api-sports.io/football/teams/6.png" },
+      "away": { "name": "Holanda", "logo": "https://media.api-sports.io/football/teams/1118.png" }
+    },
+    "goals": { "home": null, "away": null }
+  },
+  {
+    "fixture": { "id": 2002, "date": "2026-07-02T21:00:00Z", "status": { "short": "NS" } },
+    "league": { "round": "Round of 16", "season": 2026 },
+    "teams": {
+      "home": { "name": "Argentina", "logo": "https://media.api-sports.io/football/teams/26.png" },
+      "away": { "name": "Espanha", "logo": "https://media.api-sports.io/football/teams/9.png" }
+    },
+    "goals": { "home": null, "away": null }
+  }
+]
