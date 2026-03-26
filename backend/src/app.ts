@@ -49,6 +49,7 @@ app.get('/health', (_req, res) => res.json({ ok: true }))
 app.use(errorHandler)
 
 const PORT = process.env.PORT || 3333
+console.log(`[Startup] Tentando ouvir na porta ${PORT}`)
 app.listen(PORT, () => {
   console.log(`🚀 Backend rodando na porta ${PORT}`)
 })
