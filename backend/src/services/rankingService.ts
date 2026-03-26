@@ -36,7 +36,7 @@ export async function getGroupRanking(groupId: string, requesterId: string) {
   const totalGames = await prisma.game.count()
 
   return {
-    ranking: rows.map((row, index) => ({
+    ranking: rows.map((row: RankingRow, index: number) => ({
       position: index + 1,
       userId: row.userId,
       name: row.name,
