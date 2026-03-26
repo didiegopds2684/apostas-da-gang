@@ -2,8 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
   GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   signOut as firebaseSignOut,
   onAuthStateChanged,
 } from 'firebase/auth'
@@ -25,27 +24,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getRedirectResult(auth).catch(() => null)
+    let unsubscribe: () => void
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          const res = await api.post('/auth/verify')
-          setUser(res.data.user)
-        } catch {
+    async function init() {
+      unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        console.log('[Auth] onAuthStateChanged fired, firebaseUser:', firebaseUser?.email ?? null)
+        if (firebaseUser) {
+          try {
+            console.log('[Auth] Chamando /auth/verify...')
+            const res = await api.post('/auth/verify')
+            console.log('[Auth] /auth/verify respondeu:', res.data)
+            setUser(res.data.user)
+          } catch (err) {
+            console.error('[Auth] Falha ao verificar token no backend:', err)
+            setUser(null)
+          }
+        } else {
           setUser(null)
         }
-      } else {
-        setUser(null)
-      }
-      setLoading(false)
-    })
-    return unsubscribe
+        setLoading(false)
+      })
+    }
+
+    init()
+    return () => unsubscribe?.()
   }, [])
 
   async function signIn() {
     const provider = new GoogleAuthProvider()
-    await signInWithRedirect(auth, provider)
+    await signInWithPopup(auth, provider)
   }
 
   async function signOut() {
