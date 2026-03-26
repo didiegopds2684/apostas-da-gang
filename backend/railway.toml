@@ -2,9 +2,6 @@
 builder = "NIXPACKS"
 buildCommand = "npm install && npm run build && npx prisma generate"
 
-[build.nixpacksPlan.phases.setup]
-nixPkgs = ["nodejs_20", "npm-9_x", "openssl"]
-
 [deploy]
 startCommand = "npm start"
 restartPolicyType = "ON_FAILURE"
