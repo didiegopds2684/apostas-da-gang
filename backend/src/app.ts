@@ -15,19 +15,19 @@ const allowedOrigins = [
   'http://localhost:5173',
 ].filter(Boolean) as string[]
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true)
-      } else {
-        callback(new Error(`CORS: origin not allowed — ${origin}`))
-      }
-    },
-    credentials: true,
-  }),
-)
-app.options('*', cors())
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error(`CORS: origin not allowed — ${origin}`))
+    }
+  },
+  credentials: true,
+}
+
+app.options('*', cors(corsOptions))
+app.use(cors(corsOptions))
 app.use(express.json())
 
 app.use('/auth', authRouter)
