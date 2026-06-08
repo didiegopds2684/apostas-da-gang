@@ -11,7 +11,7 @@ export function LoadingSpinner({ size = 'md', className }: Props) {
   return (
     <div
       className={cn(
-        'animate-spin rounded-full border-2 border-gray-700 border-t-copa-green',
+        'animate-spin rounded-full border-2 border-ink-800 border-t-pitch-500',
         sizes[size],
         className,
       )}
@@ -21,10 +21,10 @@ export function LoadingSpinner({ size = 'md', className }: Props) {
 
 export function FullPageSpinner() {
   return (
-    <div className="flex h-svh items-center justify-center bg-gray-950">
+    <div className="flex h-svh items-center justify-center bg-ink-950">
       <div className="flex flex-col items-center gap-4">
         <LoadingSpinner size="lg" />
-        <p className="text-sm text-gray-500">Carregando...</p>
+        <p className="text-sm text-line-strong">Carregando...</p>
       </div>
     </div>
   )

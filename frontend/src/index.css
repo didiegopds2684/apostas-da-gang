@@ -2,23 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --accent: #10c97e;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
   }
 
+  html, body, #root {
+    height: 100%;
+  }
+
   body {
     margin: 0;
-    background-color: #030712;
+    background:
+      radial-gradient(120% 80% at 50% -10%, rgba(16,201,126,0.10), transparent 60%),
+      #0a0f0d;
     color: #f9fafb;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Manrope', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-tap-highlight-color: transparent;
   }
 
-  #root {
-    min-height: 100svh;
+  ::selection {
+    background: var(--accent);
+    color: #0a0f0d;
+  }
+
+  img {
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
   input[type='number']::-webkit-inner-spin-button,
@@ -33,23 +49,34 @@
 }
 
 @layer components {
-  .btn-primary {
-    @apply bg-copa-green hover:bg-copa-green-dark active:scale-95 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2;
+  .pitch-gradient {
+    background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent) 60%, #ffcb45));
   }
 
-  .btn-secondary {
-    @apply bg-white/10 hover:bg-white/20 active:scale-95 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 border border-white/20 inline-flex items-center justify-center gap-2;
+  .pitch-lines {
+    position: absolute;
+    inset: 0;
+    opacity: 0.14;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(90deg, rgba(0,0,0,.5) 0 2px, transparent 2px 64px);
   }
 
-  .btn-ghost {
-    @apply hover:bg-white/10 active:scale-95 text-gray-300 hover:text-white font-medium px-4 py-2 rounded-xl transition-all duration-200 inline-flex items-center justify-center gap-2;
+  .stadium-bg {
+    background:
+      radial-gradient(80% 120% at 50% -20%, color-mix(in oklab, var(--accent) 16%, transparent), transparent 65%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 44px);
+    pointer-events: none;
   }
 
-  .card {
-    @apply bg-gray-900 rounded-2xl border border-gray-800;
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 
   .input-field {
-    @apply bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-copa-green focus:ring-1 focus:ring-copa-green transition-colors w-full text-base;
+    @apply bg-ink-950 ring-1 ring-line rounded-xl px-4 py-3 text-white placeholder-line-strong/50 focus:outline-none focus:ring-pitch-500 transition w-full;
   }
 }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.16); background-clip: content-box; }

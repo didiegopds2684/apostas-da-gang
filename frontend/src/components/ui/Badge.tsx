@@ -8,7 +8,7 @@ interface Props {
 export function PointsBadge({ points, className }: Props) {
   if (points === null) {
     return (
-      <span className={cn('text-xs font-medium text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full', className)}>
+      <span className={cn('text-xs font-medium text-line-strong bg-ink-800 px-2 py-0.5 rounded-full', className)}>
         aguardando
       </span>
     )
@@ -16,7 +16,7 @@ export function PointsBadge({ points, className }: Props) {
 
   if (points === 0) {
     return (
-      <span className={cn('text-xs font-bold text-gray-400 bg-gray-800 px-2 py-0.5 rounded-full border border-gray-700', className)}>
+      <span className={cn('text-xs font-bold text-line-strong bg-ink-800 px-2 py-0.5 rounded-full ring-1 ring-line', className)}>
         0 pts
       </span>
     )
@@ -25,10 +25,10 @@ export function PointsBadge({ points, className }: Props) {
   return (
     <span
       className={cn(
-        'text-xs font-bold px-2 py-0.5 rounded-full border',
+        'text-xs font-bold px-2 py-0.5 rounded-full ring-1',
         points === 3
-          ? 'text-copa-yellow bg-copa-yellow/10 border-copa-yellow/30'
-          : 'text-copa-green-light bg-copa-green/10 border-copa-green/30',
+          ? 'text-gold-400 bg-gold-500/10 ring-gold-500/30'
+          : 'text-pitch-400 bg-pitch-500/10 ring-pitch-500/30',
         className,
       )}
     >

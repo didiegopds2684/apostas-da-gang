@@ -1,42 +1,57 @@
 import { prisma } from '../lib/prisma'
-import { footballApi } from '../lib/footballApi'
+import axios from 'axios'
 import { scoreGame } from './scoringService'
-import fixtureData from '../lib/fixtures/games.json'
+import { translateTeamName } from '../lib/teamNamesPt'
 
 const CACHE_TTL_MS = 60 * 60 * 1000 // 1 hora
-const WORLD_CUP_LEAGUE_ID = 1
-const WORLD_CUP_SEASON = 2026
+const CACHE_TTL_LIVE_MS = 60 * 1000 // 1 minuto quando há jogos ao vivo
+const WORLDCUP_API = 'https://worldcup26.ir/get'
 
-interface ApiFixture {
-  fixture: { id: number; date: string; status: { short: string } }
-  league: { round: string }
-  teams: {
-    home: { name: string; logo: string }
-    away: { name: string; logo: string }
-  }
-  goals: { home: number | null; away: number | null }
+interface ApiGame {
+  id: string
+  home_team_id: string
+  away_team_id: string
+  home_score: string
+  away_score: string
+  group: string
+  matchday: string
+  local_date: string
+  finished: string
+  time_elapsed: string
+  type: string
+  home_team_name_en: string
+  away_team_name_en: string
 }
 
-function parseGroupLabel(round: string): string | null {
-  const match = round.match(/Group Stage - (\d+)/i)
-  if (match) return `Rodada ${match[1]}`
-  return null
+interface ApiTeam {
+  id: string
+  name_en: string
+  flag: string
 }
 
-function mapFixture(f: ApiFixture) {
-  return {
-    externalId: f.fixture.id,
-    homeTeam: f.teams.home.name,
-    awayTeam: f.teams.away.name,
-    homeFlag: f.teams.home.logo,
-    awayFlag: f.teams.away.logo,
-    startsAt: new Date(f.fixture.date),
-    stage: f.league.round,
-    groupLabel: parseGroupLabel(f.league.round),
-    status: f.fixture.status.short,
-    homeScore: f.goals.home ?? null,
-    awayScore: f.goals.away ?? null,
-  }
+function parseDate(localDate: string): Date {
+  // format: "06/11/2026 13:00" — CST/UTC-6 (Mexico City, sem DST)
+  const [datePart, timePart] = localDate.split(' ')
+  const [month, day, year] = datePart.split('/')
+  const [hour, minute] = timePart.split(':')
+  const utcHour = parseInt(hour) + 6 // CST → UTC
+  return new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), utcHour, parseInt(minute)))
+}
+
+function mapStatus(finished: string, timeElapsed: string): string {
+  if (finished === 'TRUE') return 'FT'
+  if (timeElapsed === 'notstarted') return 'NS'
+  return 'LIVE'
+}
+
+function mapStage(type: string, group: string, matchday: string): string {
+  if (type === 'group') return `Group Stage - ${matchday}`
+  if (type === 'round_of_32') return 'Round of 32'
+  if (type === 'round_of_16') return 'Round of 16'
+  if (type === 'quarter') return 'Quarter-finals'
+  if (type === 'semi') return 'Semi-finals'
+  if (type === 'final') return 'Final'
+  return type
 }
 
 async function isCacheValid(): Promise<boolean> {
@@ -45,28 +60,45 @@ async function isCacheValid(): Promise<boolean> {
     orderBy: { updatedAt: 'desc' },
   })
   if (!latest) return false
-  return Date.now() - latest.updatedAt.getTime() < CACHE_TTL_MS
+  const hasLive = await prisma.game.count({ where: { status: 'LIVE' } })
+  const ttl = hasLive > 0 ? CACHE_TTL_LIVE_MS : CACHE_TTL_MS
+  return Date.now() - latest.updatedAt.getTime() < ttl
 }
 
-async function fetchFromApi(): Promise<ApiFixture[]> {
-  if (process.env.USE_MOCK_API === 'true') {
-    return fixtureData as ApiFixture[]
+async function fetchTeamFlags(): Promise<Map<string, string>> {
+  const res = await axios.get<{ teams: ApiTeam[] }>(`${WORLDCUP_API}/teams`)
+  const map = new Map<string, string>()
+  for (const t of res.data.teams) {
+    map.set(t.name_en, t.flag)
   }
-  const res = await footballApi.get('/fixtures', {
-    params: { league: WORLD_CUP_LEAGUE_ID, season: WORLD_CUP_SEASON },
-  })
-  return res.data.response as ApiFixture[]
+  return map
 }
 
 export async function syncGames(): Promise<void> {
-  const fixtures = await fetchFromApi()
+  const [gamesRes, flagMap] = await Promise.all([
+    axios.get<{ games: ApiGame[] }>(`${WORLDCUP_API}/games`),
+    fetchTeamFlags(),
+  ])
 
-  for (const f of fixtures) {
-    const data = mapFixture(f)
+  for (const g of gamesRes.data.games) {
+    const status = mapStatus(g.finished, g.time_elapsed)
+    const data = {
+      externalId: parseInt(g.id),
+      homeTeam: translateTeamName(g.home_team_name_en) || 'A definir',
+      awayTeam: translateTeamName(g.away_team_name_en) || 'A definir',
+      homeFlag: flagMap.get(g.home_team_name_en) ?? null,
+      awayFlag: flagMap.get(g.away_team_name_en) ?? null,
+      startsAt: parseDate(g.local_date),
+      stage: mapStage(g.type, g.group, g.matchday),
+      groupLabel: g.type === 'group' ? `Grupo ${g.group}` : null,
+      status,
+      homeScore: status !== 'NS' ? parseInt(g.home_score) : null,
+      awayScore: status !== 'NS' ? parseInt(g.away_score) : null,
+    }
+
     const existing = await prisma.game.findUnique({ where: { externalId: data.externalId } })
-
     const wasFinished = existing?.status === 'FT'
-    const nowFinished = data.status === 'FT'
+    const nowFinished = status === 'FT'
 
     await prisma.game.upsert({
       where: { externalId: data.externalId },

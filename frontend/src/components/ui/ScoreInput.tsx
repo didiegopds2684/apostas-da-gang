@@ -1,50 +1,48 @@
-import { cn } from '../../utils/cn'
+import { Icon } from './Icon'
 
-interface Props {
+interface StepperProps {
+  value: string
+  onChange: (v: string) => void
+  disabled?: boolean
+}
+
+export function Stepper({ value, onChange, disabled = false }: StepperProps) {
+  const n = value === '' ? null : Number(value)
+  const set = (next: number) => {
+    if (disabled) return
+    onChange(String(Math.max(0, Math.min(20, next))))
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <button type="button" onClick={() => set((n ?? 0) + 1)} disabled={disabled}
+        className="w-9 h-7 grid place-items-center rounded-lg bg-white/5 hover:bg-white/12 active:scale-90 text-white/70 hover:text-white transition disabled:opacity-30 disabled:cursor-not-allowed">
+        <Icon name="chevron-up" className="w-4 h-4" />
+      </button>
+      <div className="w-14 h-14 grid place-items-center rounded-xl bg-ink-950 ring-1 ring-line font-score font-bold text-3xl tabular-nums leading-none"
+        style={{ color: n == null ? 'rgba(255,255,255,.25)' : 'var(--accent)' }}>
+        {n == null ? '–' : n}
+      </div>
+      <button type="button" onClick={() => set((n ?? 0) - 1)} disabled={disabled}
+        className="w-9 h-7 grid place-items-center rounded-lg bg-white/5 hover:bg-white/12 active:scale-90 text-white/70 hover:text-white transition disabled:opacity-30 disabled:cursor-not-allowed">
+        <Icon name="chevron-down" className="w-4 h-4" />
+      </button>
+    </div>
+  )
+}
+
+export function ScoreInput({ homeScore, awayScore, onHomeChange, onAwayChange, disabled }: {
   homeScore: string
   awayScore: string
   onHomeChange: (v: string) => void
   onAwayChange: (v: string) => void
   disabled?: boolean
-  className?: string
-}
-
-export function ScoreInput({ homeScore, awayScore, onHomeChange, onAwayChange, disabled, className }: Props) {
-  function handleChange(val: string, setter: (v: string) => void) {
-    const num = parseInt(val, 10)
-    if (val === '' || (num >= 0 && num <= 20)) setter(val)
-  }
-
-  const inputClass = cn(
-    'w-12 h-12 text-center text-xl font-bold rounded-xl border transition-colors',
-    disabled
-      ? 'bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed'
-      : 'bg-gray-800 border-copa-green/50 text-white focus:outline-none focus:border-copa-green focus:ring-1 focus:ring-copa-green',
-  )
-
+}) {
   return (
-    <div className={cn('flex items-center gap-2', className)}>
-      <input
-        type="number"
-        min={0}
-        max={20}
-        value={homeScore}
-        onChange={(e) => handleChange(e.target.value, onHomeChange)}
-        disabled={disabled}
-        className={inputClass}
-        placeholder="0"
-      />
-      <span className="text-gray-500 font-bold text-lg">×</span>
-      <input
-        type="number"
-        min={0}
-        max={20}
-        value={awayScore}
-        onChange={(e) => handleChange(e.target.value, onAwayChange)}
-        disabled={disabled}
-        className={inputClass}
-        placeholder="0"
-      />
+    <div className="flex items-center gap-2">
+      <Stepper value={homeScore} onChange={onHomeChange} disabled={disabled} />
+      <span className="font-score text-line-strong text-2xl pt-1">:</span>
+      <Stepper value={awayScore} onChange={onAwayChange} disabled={disabled} />
     </div>
   )
 }

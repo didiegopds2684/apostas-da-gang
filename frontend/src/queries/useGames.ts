@@ -14,6 +14,10 @@ export function useGames(filters?: GamesFilters) {
       const res = await api.get('/games', { params: filters })
       return res.data.games
     },
+    refetchInterval: (query) => {
+      const hasLive = query.state.data?.some((g) => g.status === 'LIVE')
+      return hasLive ? 30_000 : 5 * 60_000
+    },
   })
 }
 

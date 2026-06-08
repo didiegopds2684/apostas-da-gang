@@ -3,85 +3,97 @@ import { useGames } from '../queries/useGames'
 import { GameCard } from '../components/game/GameCard'
 import { LoadingSpinner } from '../components/ui/LoadingSpinner'
 import { ErrorMessage } from '../components/ui/ErrorMessage'
-import { cn } from '../utils/cn'
+import { Icon } from '../components/ui/Icon'
 
 type StageFilter = 'all' | 'group' | 'knockout'
 
-const tabs: { label: string; value: StageFilter }[] = [
+const TABS: { label: string; value: StageFilter }[] = [
   { label: 'Todos', value: 'all' },
   { label: 'Grupos', value: 'group' },
   { label: 'Eliminatórias', value: 'knockout' },
 ]
 
+const DOW = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+const MON = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+
+function fmtDayLabel(s: string) {
+  const d = new Date(s)
+  return `${DOW[d.getDay()]}, ${d.getDate()} ${MON[d.getMonth()]}`
+}
+
+function dayKey(s: string) {
+  const d = new Date(s)
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+}
+
 export function GamesPage() {
   const [stage, setStage] = useState<StageFilter>('all')
-  const [date, setDate] = useState('')
-
   const { data: games, isLoading, error, refetch } = useGames({
     stage: stage === 'all' ? undefined : stage,
-    date: date || undefined,
+  })
+
+  const byDay: { key: string; label: string; games: typeof games }[] = []
+  games?.forEach((g) => {
+    const k = dayKey(g.startsAt)
+    let bucket = byDay.find((b) => b.key === k)
+    if (!bucket) { bucket = { key: k, label: fmtDayLabel(g.startsAt), games: [] }; byDay.push(bucket) }
+    bucket.games!.push(g)
   })
 
   return (
-    <div className="px-4 py-6 pb-24 md:pb-6 max-w-2xl mx-auto animate-fade-in">
-      <h1 className="text-2xl font-bold text-white mb-6">Jogos</h1>
-
-      {/* Filters */}
-      <div className="space-y-3 mb-6">
-        {/* Stage tabs */}
-        <div className="flex gap-2 bg-gray-900 p-1 rounded-xl">
-          {tabs.map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => setStage(tab.value)}
-              className={cn(
-                'flex-1 py-2 rounded-lg text-sm font-medium transition-all',
-                stage === tab.value
-                  ? 'bg-copa-green text-white shadow-sm'
-                  : 'text-gray-400 hover:text-white',
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
+    <div className="px-4 pb-28 md:pb-10 max-w-2xl mx-auto animate-fade-in">
+      {/* Header */}
+      <div className="flex items-end justify-between pt-6 mb-5">
+        <div>
+          <h1 className="font-display font-extrabold text-3xl text-white">Jogos</h1>
+          <p className="text-sm text-line-strong mt-0.5">
+            {games ? `${games.length} partidas · dê seus palpites` : 'Carregando...'}
+          </p>
         </div>
-
-        {/* Date filter */}
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="input-field text-sm"
-        />
       </div>
 
-      {/* Content */}
-      {isLoading && (
-        <div className="flex justify-center py-12">
-          <LoadingSpinner size="lg" />
+      {/* Stage tabs — sticky */}
+      <div className="sticky top-[60px] md:top-[68px] z-20 -mx-1 px-1 py-2 mb-2 bg-ink-950/80 backdrop-blur-md">
+        <div className="flex gap-1 bg-ink-900 ring-1 ring-line p-1 rounded-xl">
+          {TABS.map((t) => {
+            const on = stage === t.value
+            return (
+              <button key={t.value} onClick={() => setStage(t.value)}
+                style={on ? { background: 'var(--accent)', color: '#0a0f0d' } : undefined}
+                className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-transform ${on ? '' : 'text-line-strong hover:text-white'}`}>
+                {t.label}
+              </button>
+            )
+          })}
         </div>
+      </div>
+
+      {isLoading && (
+        <div className="flex justify-center py-12"><LoadingSpinner /></div>
       )}
 
-      {error && (
-        <ErrorMessage
-          message="Erro ao carregar jogos"
-          onRetry={() => refetch()}
-        />
-      )}
+      {error && <ErrorMessage message="Erro ao carregar jogos" onRetry={() => refetch()} />}
 
       {games && games.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-sm">Nenhum jogo encontrado</p>
+          <p className="text-line-strong text-sm">Nenhum jogo encontrado</p>
         </div>
       )}
 
-      {games && games.length > 0 && (
-        <div className="space-y-3">
-          {games.map((game) => (
-            <GameCard key={game.id} game={game} />
-          ))}
-        </div>
-      )}
+      <div className="space-y-6">
+        {byDay.map((day) => (
+          <div key={day.key}>
+            <div className="flex items-center gap-2 mb-3">
+              <Icon name="calendar" className="w-3.5 h-3.5 text-line-strong" />
+              <span className="text-[12px] font-bold text-line-strong uppercase tracking-wider">{day.label}</span>
+              <span className="text-[11px] text-line-strong/60">· {day.games!.length} jogos</span>
+            </div>
+            <div className="space-y-3">
+              {day.games!.map((g) => <GameCard key={g.id} game={g} />)}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

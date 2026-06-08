@@ -37,7 +37,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-svh bg-gray-950">
+    <div className="min-h-svh bg-ink-950">
       <Navbar />
       <main className="md:pt-0">{children}</main>
     </div>
@@ -157,13 +157,13 @@ createRoot(document.getElementById('root')!).render(
             position="top-center"
             toastOptions={{
               style: {
-                background: '#1f2937',
-                color: '#f9fafb',
-                border: '1px solid #374151',
+                background: '#1b2722',
+                color: '#ffffff',
+                border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: '12px',
               },
               success: {
-                iconTheme: { primary: '#00873f', secondary: '#f9fafb' },
+                iconTheme: { primary: '#10c97e', secondary: '#0a0f0d' },
               },
             }}
           />

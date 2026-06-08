@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { useAuth } from '../contexts/AuthContext'
 import { LoadingSpinner } from '../components/ui/LoadingSpinner'
+import { Icon } from '../components/ui/Icon'
 
 export function LoginPage() {
   const { user, loading, signIn } = useAuth()
@@ -10,8 +11,8 @@ export function LoginPage() {
 
   if (loading) {
     return (
-      <div className="flex h-svh items-center justify-center bg-gray-950">
-        <LoadingSpinner size="lg" />
+      <div className="flex h-svh items-center justify-center">
+        <LoadingSpinner />
       </div>
     )
   }
@@ -35,45 +36,38 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-svh bg-gray-950 flex flex-col items-center justify-center px-4">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-copa-green/10 via-transparent to-copa-yellow/5 pointer-events-none" />
-
-      <div className="relative w-full max-w-sm animate-fade-in">
+    <div className="min-h-svh flex flex-col items-center justify-center px-4">
+      <div className="w-full max-w-sm animate-fade-in">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-copa-green mb-4 shadow-lg shadow-copa-green/30">
-            <span className="text-4xl">⚽</span>
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-pitch-500 mb-4 shadow-[0_8px_32px_-8px_#10c97e]">
+            <Icon name="ball" className="w-10 h-10 text-ink-950" strokeWidth={2} fill />
           </div>
-          <h1 className="text-3xl font-black text-white mb-1">
-            Bolão <span className="text-copa-yellow">Copa 2026</span>
+          <h1 className="font-display font-black text-4xl text-white mb-1">
+            Bolão<span className="text-pitch-500">26</span>
           </h1>
-          <p className="text-gray-400 text-sm">
-            Faça seus palpites e dispute com amigos
-          </p>
+          <p className="text-line-strong text-sm">Palpites · Grupos · Ranking em tempo real</p>
         </div>
 
-        {/* Feature list */}
+        {/* Features */}
         <div className="space-y-2 mb-8">
           {[
-            '⚽  Palpite em todos os jogos da Copa',
-            '🏆  Rankingcom seus amigos',
-            '📊  Pontuação em tempo real',
+            { icon: 'ball', text: 'Palpite em todos os 104 jogos da Copa' },
+            { icon: 'users', text: 'Dispute com amigos em grupos privados' },
+            { icon: 'flash', text: 'Pontuação e ranking atualizados em tempo real' },
           ].map((item) => (
-            <div key={item} className="flex items-center gap-3 bg-white/5 rounded-xl px-4 py-3 text-sm text-gray-300">
-              {item}
+            <div key={item.text} className="flex items-center gap-3 bg-ink-900 ring-1 ring-line rounded-xl px-4 py-3 text-sm text-white">
+              <Icon name={item.icon as any} className="w-4 h-4 text-pitch-400 shrink-0" />
+              {item.text}
             </div>
           ))}
         </div>
 
-        {/* Sign in button */}
-        <button
-          onClick={handleSignIn}
-          disabled={signingIn}
-          className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 active:scale-95 text-gray-900 font-semibold py-4 rounded-2xl transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-base"
-        >
+        {/* Sign in */}
+        <button onClick={handleSignIn} disabled={signingIn}
+          className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 active:scale-95 text-gray-900 font-semibold py-4 rounded-2xl transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-base">
           {signingIn ? (
-            <LoadingSpinner size="sm" className="border-gray-400 border-t-gray-900" />
+            <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin" />
           ) : (
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -85,9 +79,7 @@ export function LoginPage() {
           {signingIn ? 'Entrando...' : 'Entrar com Google'}
         </button>
 
-        <p className="text-center text-xs text-gray-600 mt-6">
-          Copa do Mundo · Junho–Julho 2026
-        </p>
+        <p className="text-center text-xs text-line-strong mt-6">Copa do Mundo · Junho–Julho 2026</p>
       </div>
     </div>
   )

@@ -1,157 +1,147 @@
-import { Link } from 'react-router-dom'
-import { Trophy, Gamepad2, Users, ChevronRight, Target } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useGames } from '../queries/useGames'
 import { useMyGroups } from '../queries/useGroups'
+import { GameCard } from '../components/game/GameCard'
 import { Avatar } from '../components/ui/Avatar'
+import { Icon } from '../components/ui/Icon'
 import { LoadingSpinner } from '../components/ui/LoadingSpinner'
 import { isPredictionOpen } from '../utils/dateUtils'
-import type { Game } from '../types/api'
 
-function NextGameCard({ games }: { games: Game[] }) {
-  const nextWithoutPrediction = games.find(
-    (g) => g.status === 'NS' && g.myPrediction === null && isPredictionOpen(g.startsAt),
-  )
-
-  if (!nextWithoutPrediction) {
-    return (
-      <div className="card p-4 flex items-center gap-3">
-        <div className="h-10 w-10 rounded-xl bg-copa-green/20 flex items-center justify-center">
-          <Target className="h-5 w-5 text-copa-green-light" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-white">Todos os palpites feitos!</p>
-          <p className="text-xs text-gray-500">Aguardando os jogos</p>
-        </div>
-      </div>
-    )
-  }
-
+function SectionLabel({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <Link to={`/games/${nextWithoutPrediction.id}`} className="card p-4 flex items-center gap-3 hover:border-gray-700 transition-colors">
-      <div className="h-10 w-10 rounded-xl bg-copa-yellow/10 flex items-center justify-center">
-        <span className="text-lg">⚽</span>
+    <div className="flex items-center justify-between mb-3">
+      <h2 className="text-[12px] font-bold text-line-strong uppercase tracking-[0.14em]">{children}</h2>
+      {action}
+    </div>
+  )
+}
+
+function StatTile({ value, label, accent, icon }: { value: string | number; label: string; accent?: string; icon?: string }) {
+  return (
+    <div className="rounded-2xl bg-ink-900 ring-1 ring-line px-3 py-3.5 flex flex-col gap-1">
+      <div className="flex items-center gap-1.5" style={{ color: accent || 'white' }}>
+        {icon && <Icon name={icon as any} className="w-3.5 h-3.5" />}
+        <span className="font-score font-bold text-[28px] leading-none tabular-nums">{value}</span>
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs text-gray-500 mb-0.5">Próximo sem palpite</p>
-        <p className="text-sm font-semibold text-white truncate">
-          {nextWithoutPrediction.homeTeam} × {nextWithoutPrediction.awayTeam}
-        </p>
-      </div>
-      <ChevronRight className="h-4 w-4 text-gray-600 flex-shrink-0" />
-    </Link>
+      <span className="text-[11px] text-line-strong leading-tight">{label}</span>
+    </div>
   )
 }
 
 export function DashboardPage() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const { data: games, isLoading: gamesLoading } = useGames()
   const { data: groups } = useMyGroups()
 
   if (!user) return null
 
   const firstName = user.name.split(' ')[0]
-  const totalPredictions = games?.filter((g) => g.myPrediction !== null).length ?? 0
+  const totalPreds = games?.filter((g) => g.myPrediction !== null).length ?? 0
+  const exactScores = games?.filter((g) => g.myPrediction?.points === 3).length ?? 0
+  const pendingGames = games?.filter((g) => g.status === 'NS' && g.myPrediction === null && isPredictionOpen(g.startsAt)).length ?? 0
+  const liveGame = games?.find((g) => g.status === 'LIVE')
+  const nextOpen = games?.find((g) => g.status === 'NS' && g.myPrediction === null && isPredictionOpen(g.startsAt))
   const totalGames = games?.length ?? 0
-  const pendingGames = games?.filter(
-    (g) => g.status === 'NS' && g.myPrediction === null && isPredictionOpen(g.startsAt),
-  ).length ?? 0
 
   return (
-    <div className="px-4 py-6 pb-24 md:pb-6 max-w-2xl mx-auto space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Avatar name={user.name} avatarUrl={user.avatarUrl} size="lg" />
-        <div>
-          <p className="text-gray-400 text-sm">Olá,</p>
-          <h1 className="text-2xl font-bold text-white">{firstName} 👋</h1>
+    <div className="px-4 py-6 pb-28 md:pb-10 max-w-2xl mx-auto space-y-7 animate-fade-in">
+      {/* Greeting */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3.5">
+          <Avatar name={user.name} avatarUrl={user.avatarUrl} size="lg" ring />
+          <div>
+            <p className="text-line-strong text-sm">Bem-vindo de volta,</p>
+            <h1 className="font-display font-extrabold text-2xl text-white leading-tight">{firstName} 👋</h1>
+          </div>
+        </div>
+      </div>
+
+      {/* Tournament banner */}
+      <div className="relative overflow-hidden rounded-2xl ring-1 ring-pitch-500/25 pitch-gradient px-5 py-4">
+        <div className="pitch-lines" />
+        <div className="relative flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink-950/70">Copa do Mundo 2026</p>
+            <p className="font-display font-extrabold text-ink-950 text-lg leading-tight">
+              {pendingGames > 0 ? `${pendingGames} palpites pendentes` : 'Fase de grupos em andamento'}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="font-score font-bold text-3xl text-ink-950 leading-none tabular-nums">{totalPreds}/{totalGames}</p>
+            <p className="text-[11px] text-ink-950/70 font-semibold">palpites feitos</p>
+          </div>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="card p-3 text-center">
-          <p className="text-2xl font-black text-copa-green-light">{totalPredictions}</p>
-          <p className="text-xs text-gray-500 mt-0.5">palpites</p>
-        </div>
-        <div className="card p-3 text-center">
-          <p className="text-2xl font-black text-copa-yellow">{pendingGames}</p>
-          <p className="text-xs text-gray-500 mt-0.5">pendentes</p>
-        </div>
-        <div className="card p-3 text-center">
-          <p className="text-2xl font-black text-white">{groups?.length ?? 0}</p>
-          <p className="text-xs text-gray-500 mt-0.5">grupos</p>
-        </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <StatTile value={totalPreds} label="palpites dados" accent="var(--accent)" icon="target" />
+        <StatTile value={exactScores} label="placares exatos" accent="#f5b417" icon="star" />
+        <StatTile value={pendingGames} label="jogos pendentes" icon="clock" />
+        <StatTile value={groups?.length ?? 0} label="grupos ativos" accent="var(--accent)" icon="users" />
       </div>
 
-      {/* Next game without prediction */}
+      {/* Live game */}
+      {liveGame && (
+        <div>
+          <SectionLabel>Acontecendo agora</SectionLabel>
+          <GameCard game={liveGame} />
+        </div>
+      )}
+
+      {/* Action needed */}
       <div>
-        <h2 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">Ação necessária</h2>
+        <SectionLabel action={
+          <button onClick={() => navigate('/games')} className="text-xs font-semibold text-[var(--accent)] hover:brightness-110 transition">
+            Ver todos
+          </button>
+        }>
+          {nextOpen ? 'Ação necessária' : 'Próximos jogos'}
+        </SectionLabel>
         {gamesLoading ? (
-          <div className="card p-4 flex items-center justify-center">
-            <LoadingSpinner size="sm" />
+          <div className="flex justify-center py-8"><LoadingSpinner /></div>
+        ) : nextOpen ? (
+          <GameCard game={nextOpen} />
+        ) : games && games.filter((g) => g.status === 'NS').length > 0 ? (
+          <div className="space-y-3">
+            {games.filter((g) => g.status === 'NS').slice(0, 3).map((g) => (
+              <GameCard key={g.id} game={g} />
+            ))}
           </div>
-        ) : games ? (
-          <NextGameCard games={games} />
-        ) : null}
+        ) : (
+          <div className="rounded-2xl bg-ink-900 ring-1 ring-line p-6 text-center">
+            <p className="text-line-strong text-sm">Todos os palpites feitos! Aguardando os jogos.</p>
+          </div>
+        )}
       </div>
 
-      {/* Quick access */}
-      <div>
-        <h2 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">Acesso rápido</h2>
-        <div className="grid grid-cols-2 gap-3">
-          <Link
-            to="/games"
-            className="card p-4 flex flex-col gap-3 hover:border-gray-700 transition-colors active:scale-[0.98]"
-          >
-            <div className="h-10 w-10 rounded-xl bg-copa-green/20 flex items-center justify-center">
-              <Gamepad2 className="h-5 w-5 text-copa-green-light" />
-            </div>
-            <div>
-              <p className="font-semibold text-white">Jogos</p>
-              <p className="text-xs text-gray-500">
-                {gamesLoading ? '...' : `${totalGames} jogos`}
-              </p>
-            </div>
-          </Link>
-
-          <Link
-            to="/groups"
-            className="card p-4 flex flex-col gap-3 hover:border-gray-700 transition-colors active:scale-[0.98]"
-          >
-            <div className="h-10 w-10 rounded-xl bg-copa-yellow/10 flex items-center justify-center">
-              <Users className="h-5 w-5 text-copa-yellow" />
-            </div>
-            <div>
-              <p className="font-semibold text-white">Grupos</p>
-              <p className="text-xs text-gray-500">
-                {groups?.length ? `${groups.length} grupo${groups.length > 1 ? 's' : ''}` : 'Nenhum ainda'}
-              </p>
-            </div>
-          </Link>
-        </div>
-      </div>
-
-      {/* My groups ranking shortcut */}
+      {/* My groups */}
       {groups && groups.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wide">Meus grupos</h2>
-          <div className="space-y-2">
-            {groups.map((group) => (
-              <Link
-                key={group.id}
-                to={`/groups/${group.id}/ranking`}
-                className="card p-4 flex items-center gap-3 hover:border-gray-700 transition-colors"
-              >
-                <div className="h-9 w-9 rounded-xl bg-gray-800 flex items-center justify-center">
-                  <Trophy className="h-4 w-4 text-copa-yellow" />
+          <SectionLabel action={
+            <button onClick={() => navigate('/groups')} className="text-xs font-semibold text-[var(--accent)] hover:brightness-110 transition">
+              Gerenciar
+            </button>
+          }>
+            Meus grupos
+          </SectionLabel>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {groups.map((g) => (
+              <button key={g.id} onClick={() => navigate(`/groups/${g.id}`)}
+                className="text-left rounded-2xl bg-ink-900 ring-1 ring-line hover:ring-line-strong p-4 transition">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-xl bg-ink-800 grid place-items-center text-lg">🏆</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-display font-bold text-white truncate">{g.name}</p>
+                      {g.myRole === 'admin' && <Icon name="crown" className="w-3.5 h-3.5 text-gold-400 shrink-0" fill />}
+                    </div>
+                    <p className="text-[11px] text-line-strong">{g.memberCount} membros</p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-white truncate">{group.name}</p>
-                  <p className="text-xs text-gray-500">{group.memberCount} membros</p>
-                </div>
-                <ChevronRight className="h-4 w-4 text-gray-600 flex-shrink-0" />
-              </Link>
+              </button>
             ))}
           </div>
         </div>
